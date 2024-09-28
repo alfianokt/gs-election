@@ -3,13 +3,19 @@ import Cookies from 'js-cookie';
 import navaid from 'navaid';
 import api from './api';
 
+function getApiKeyFromUrl() {
+  const url = window.location.href; // Get the current URL
+  const match = url.match(/#id=([^&]+)/); // Regex to capture the API key after #id=
+  return match ? match[1] : null; // Return the API key or null if not found
+}
+
 const app = () => {
-  const configSelector = document.getElementById('config').dataset;
+  const apiKey = getApiKeyFromUrl();
 
   // Application configuration
   const _config = {
-    name: configSelector.name, // Application name
-    api: configSelector.api     // API URL
+    name: "Election", // Application name
+    api: apiKey ? `https://script.google.com/macros/s/${apiKey}/exec` : null // Construct the API URL
   };
 
   return {
