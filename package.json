@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "alpinejs": "^2.7.3",
+    "esbuild": "^0.8.8",
+    "js-cookie": "^2.2.1",
+    "navaid": "^1.2.0",
+    "watchlist": "^0.2.3"
+  },
+  "name": "esb",
+  "version": "1.0.0",
+  "main": "build.js",
+  "scripts": {
+    "dev": "node builder && watchlist src -- node builder",
+    "build": "node builder prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

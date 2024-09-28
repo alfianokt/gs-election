@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://bootswatch.com/4/pulse/bootstrap.min.css">
+    <title>GAS E-Pilketos</title>
+    <meta name="title" content="GAS E-Pilketos">
+    <meta name="description" content="GAS E-Pilketos adalah aplikasi pemilihan ketua osis dengan Google Apps Script">
+    <meta name="keywords" content="gas e-pilketos, pilketos, pilketos realtime, pemilihan ketua osis">
+  </head>
+  <body x-data="window.app()" x-init="init()">
+    <!-- navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-primary" style="min-height: 5vh;">
+      <a class="navbar-brand font-weight-bold" href="/" x-text="_config.name"></a>
+      <button class="navbar-toggler" @click="state.navbar = !state.navbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" x-show.transition="state.navbar">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <template x-if="!loggedIn()">
+              <a class="nav-link" href="/login">
+                Choose Now
+              </a>
+            </template>
+
+            <template x-if="loggedIn()">
+              <a class="nav-link" href="/logout">
+                Logout
+              </a>
+            </template>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Home Section -->
+    <div x-show.transition="state.page.on == '/'">
+      <div id="home">
+        <!-- Hero Section -->
+        <section class="container-fluid align-middle">
+          <div class="row align-items-center py-3">
+            <!-- Hero Content -->
+            <div class="col-md-6 my-1">
+              <div class="jumbotron bg-white">
+                <h1 class="display-4">Election for Head and Vice of Student Council</h1>
+                <p class="lead"></p>
+                <hr class="my-4">
+                <p>Support the election of the Head and Vice for the 2020/2021 period by voting honestly and sincerely.</p>
+                <a class="btn btn-primary btn-lg" href="/login" role="button">Vote Now</a>
+              </div>
+            </div>
+
+            <!-- Image (visible on md screens and larger) -->
+            <div class="col-md-6 d-none d-md-block my-1">
+              <img src="/img/undraw_Selection_re_poer.svg" alt="Illustration" class="img-fluid h-100">
+            </div>
+          </div>
+        </section>
+
+        <!-- Guide Section -->
+        <section class="container-fluid border-top bg-light py-3">
+          <div class="row">
+            <div class="col-12 text-center">
+              <h2>Voting Guide 📝</h2>
+            </div>
+            <div class="col-lg-3 text-center">
+              <h3>🔐</h3>
+              <p>Log in with the token provided by the committee.</p>
+            </div>
+            <div class="col-lg-3 text-center">
+              <h3>📃</h3>
+              <p>View candidates and don’t forget to read their vision and mission.</p>
+            </div>
+            <div class="col-lg-3 text-center">
+              <h3>📍</h3>
+              <p>Choose the candidate that aligns with your values and vision.</p>
+            </div>
+            <div class="col-lg-3 text-center">
+              <h3>🎉</h3>
+              <p>Thank you for participating in the election for the Head and Vice of the Student Council.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Candidates Section -->
+        <section class="container-fluid py-3">
+          <!-- Head Candidates -->
+          <h1 class="text-center font-weight-bold">Head Candidates</h1>
+          <div class="row">
+            <template x-for="item in candidates.filter(e => e.position == 'head')">
+              <div class="col-lg-4 col-md-6">
+                <div class="card my-2">
+                  <div class="d-flex justify-content-center">
+                    <img :src="item.photo" style="max-width: 200px;" class="card-img-top" alt="Candidate Photo">
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <span x-text="item.name"></span>
+                      <a class="btn btn-primary float-right" :href="`/candidate/${item.id}`">Vision & Mission</a>
+                    </h5>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Vice Candidates -->
+          <h1 class="text-center font-weight-bold border-top mt-3 pt-3">Vice Candidates</h1>
+          <div class="row">
+            <template x-for="item in candidates.filter(e => e.position == 'vice')">
+              <div class="col-lg-4 col-md-6">
+                <div class="card my-2">
+                  <div class="d-flex justify-content-center">
+                    <img :src="item.photo" style="max-width: 200px;" class="card-img-top" alt="Candidate Photo">
+                  </div>
+                  <div class="card-body">
+                    <h5 class="card-title">
+                      <span x-text="item.name"></span>
+                      <a class="btn btn-primary float-right" :href="`/candidate/${item.id}`">Vision & Mission</a>
+                    </h5>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <!-- Final Prompt Section -->
+        <section class="container-fluid border-top py-5">
+          <div class="row">
+            <div class="col-12 text-center">
+              <h2>Ready to Vote?</h2>
+              <a href="/login" class="btn btn-primary btn-lg">Vote Now</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Candidate Details Section -->
+    <div x-show.transition="state.page.on == 'candidate'">
+      <div id="candidate" class="container mb-3">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <template x-for="item in candidates.filter(e => e.id == state.page.params.id)">
+              <div class="card my-2">
+                <div class="card-header">
+                  <div>
+                    <h3>Candidate Vision & Mission</h3>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <img :src="item.photo" style="max-width: 200px;" class="card-img-top" alt="Candidate Photo">
+                </div>
+                <div class="card-body p-3">
+                  <h3 class="card-title" x-text="item.name"></h3>
+                  <h5>Vision</h5>
+                  <p class="card-text" x-text="item.vision"></p>
+                  <h5>Mission</h5>
+                  <p class="card-text" x-text="item.mission"></p>
+                  <button class="btn btn-primary float-right" @click="history.back()">Back</button>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voting Selection Section -->
+    <div x-show.transition="state.page.on == 'choose'">
+
+      <div class="container py-3" x-show.transition="state.page.params.id == null">
+        <h1 class="text-center font-weight-bold">Please Choose the Candidate <span x-text="form.model.candidate.head != null ? 'Vice' : ''"></span> for Student Council Head</h1>
+        <div class="row">
+          <template x-for="item in candidates.filter(e => e.position == (form.model.candidate.head == null ? 'head' : 'vice'))">
+            <div class="col-lg-4 col-md-6">
+              <div class="card my-2">
+                <div class="d-flex justify-content-center">
+                  <img :src="item.photo" style="max-width: 200px;" class="card-img-top" alt="Candidate Photo">
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">
+                    <span x-text="item.name"></span>
+                    <button class="btn btn-primary float-right" @click="state.page.params.id = item.id">Choose</button>
+                  </h5>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div class="container" x-show.transition="state.page.params.id != null">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <template x-for="item in candidates.filter(e => e.id == state.page.params.id)">
+              <div class="card my-2">
+                <div class="card-header">
+                  <div>
+                    <h3>Candidate Vision & Mission</h3>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <img :src="item.photo" style="max-width: 200px;" class="card-img-top" alt="Candidate Photo">
+                </div>
+                <div class="card-body p-3">
+                  <h3 class="card-title" x-text="item.name"></h3>
+                  <h5>Vision</h5>
+                  <p class="card-text" x-text="item.vision"></p>
+                  <h5>Mission</h5>
+                  <p class="card-text" x-text="item.mission"></p>
+
+                  <div class="float-right p-1">
+                    <button
+                      class="btn btn-outline-primary"
+                      @click="vote(item)"
+                      :disabled="state.loading.show">
+                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" x-show.transition="state.loading.show"></span>
+                      Choose
+                    </button>
+
+                    <button class="btn btn-primary" @click="state.page.params.id = null" :disabled="state.loading.show">Back</button>
+                  </div>
+                </div>
+                <div class="container">
+                  <div
+                    x-show.transition="state.alert.type != '' && state.alert.msg != ''"
+                    class="alert"
+                    :class="{'alert-warning': state.alert.type == 'warning', 'alert-danger': state.alert.type == 'danger', 'alert-success': state.alert.type == 'success'}">
+                    <div class="alert-body">
+                      <span x-text="alertIcons[state.alert.type]"></span>
+                      <span x-text="state.alert.msg"></span>
+                      <button type="button" class="close" @click="setAlert()">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance Code Section -->
+    <div x-show.transition="state.page.on == 'attendance-code'">
+      <div id="attendance" class="container my-3" style="min-height: 75vh;">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Thank You</h3>
+              </div>
+              <div class="card-body">
+                <h5>Your attendance code is:</h5>
+                <div class="alert alert-primary">
+                  <div class="alert-body text-center" x-text="form.model.attendanceCode"></div>
+                </div>
+
+                <a class="btn btn-primary float-right" href="/logout">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Section -->
+    <div x-show.transition="state.page.on == 'login'">
+      <div id="login" class="container my-3" style="min-height: 75vh;">
+        <div class="row justify-content-center">
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Login Form</h3>
+              </div>
+              <div class="card-body">
+                <form action="" @submit.prevent="login()">
+                  <div class="form-group">
+                    <label for="token">Enter Your Token Code</label>
+                    <input type="text" class="form-control" id="token" x-model="form.model.token" :disabled="state.loading.show" />
+                  </div>
+
+                  <button class="btn btn-primary" type="submit" :disabled="state.loading.show">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" x-show.transition="state.loading.show"></span>
+                    Login
+                  </button>
+                </form>
+
+                <div
+                  x-show.transition="state.alert.type != '' && state.alert.msg != ''"
+                  class="alert mt-3"
+                  :class="{'alert-warning': state.alert.type == 'warning', 'alert-danger': state.alert.type == 'danger', 'alert-success': state.alert.type == 'success'}">
+                  <div class="alert-body">
+                    <span x-text="alertIcons[state.alert.type]"></span>
+                    <span x-text="state.alert.msg"></span>
+                    <button type="button" class="close" @click="setAlert()">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="container-fluid">
+      <div class="row bg-light py-3">
+        <div class="col-lg-6 text-center text-lg-left">
+          <ul class="list-inline mb-0">
+            <li class="list-inline-item">
+              <a href="https://facebook.com/alfianokt104" target="_blank" aria-label="Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-7 -2 24 24" width="28" height="28" preserveAspectRatio="xMinYMin" class="jam jam-facebook" fill="currentColor">
+                  <path d="M2.046 3.865v2.748H.032v3.36h2.014v9.986H6.18V9.974h2.775s.26-1.611.386-3.373H6.197V4.303c0-.343.45-.805.896-.805h2.254V0H6.283c-4.34 0-4.237 3.363-4.237 3.865z"/>
+                </svg>
+              </a>
+            </li>
+            <li class="list-inline-item">
+              <a href="https://wa.me/6285155214271" target="_blank" aria-label="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 24 24" width="28" height="28" preserveAspectRatio="xMinYMin" class="jam jam-whatsapp" fill="currentColor">
+                  <path d="M9.516.012C4.206.262.017 4.652.033 9.929a9.798 9.798 0 0 0 1.085 4.465L.06 19.495a.387.387 0 0 0 .47.453l5.034-1.184a9.981 9.981 0 0 0 4.284 1.032c5.427.083 9.951-4.195 10.12-9.58C20.15 4.441 15.351-.265 9.516.011zm6.007 15.367a7.784 7.784 0 0 1-5.52 2.27 7.77 7.77 0 0 1-3.474-.808l-.701-.347-3.087.726.65-3.131-.346-.672A7.62 7.62 0 0 1 2.197 9.9c0-2.07.812-4.017 2.286-5.48a7.85 7.85 0 0 1 5.52-2.271c2.086 0 4.046.806 5.52 2.27a7.672 7.672 0 0 1 2.287 5.48c0 2.052-.825 4.03-2.287 5.481z"/>
+                  </svg>
+                </a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-lg-6 text-center text-lg-right">
+          &copy; 2020 <span x-text="(new Date()).getFullYear() > 2020 ? '- ' + (new Date()).getFullYear() : ''"></span> Alfian Oktafireza
+        </div>
+      </div>
+    </footer>
+
+    <!-- application config -->
+    <!-- <div id="config" data-name="Pilketos" data-api="https://script.google.com/macros/s/AKfycbxXC3-Wh9L2_BxUjL0HBGzjQWMHjEWK036WLA19oZtKmoSbrYU/exec"></div> -->
+    <div id="config" data-name="Election" data-api="https://script.google.com/macros/s/AKfycbw-O21YgXLCamMJPIvOQ7_TT0bzjVpXg4BVZZdmZj7_kgMj8e5vMDPBiXTF__R2kTgU/exec"></div>
+
+    <!-- app js -->
+    <script src="/build/app.js" defer></script>
+  </body>
+</html>
