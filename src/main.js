@@ -5,7 +5,7 @@ import api from './api';
 
 function getApiKeyFromUrl() {
   const url = window.location.href; // Get the current URL
-  const match = url.match(/#id=([^&]+)/); // Regex to capture the API key after #id=
+  const match = url.match(/#([^&]+)/); // Regex to capture the API key after #id=
   return match ? match[1] : null; // Return the API key or null if not found
 }
 
